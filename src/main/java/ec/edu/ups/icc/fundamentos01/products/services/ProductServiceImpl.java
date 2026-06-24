@@ -53,7 +53,7 @@ public class ProductServiceImpl implements ProductService {
     public Object update(Long id, UpdateProductDto dto) {
         ProductEntity existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-        
+
         existing.setName(dto.getName());
         existing.setDescription(dto.getDescription());
         existing.setPrice(dto.getPrice());
@@ -68,10 +68,14 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        if (dto.getName() != null) existing.setName(dto.getName());
-        if (dto.getDescription() != null) existing.setDescription(dto.getDescription());
-        if (dto.getPrice() != null) existing.setPrice(dto.getPrice());
-        if (dto.getStock() != null) existing.setStock(dto.getStock());
+        if (dto.getName() != null)
+            existing.setName(dto.getName());
+        if (dto.getDescription() != null)
+            existing.setDescription(dto.getDescription());
+        if (dto.getPrice() != null)
+            existing.setPrice(dto.getPrice());
+        if (dto.getStock() != null)
+            existing.setStock(dto.getStock());
 
         ProductEntity saved = repository.save(existing);
         return mapper.toResponseDto(mapper.toModel(saved));
@@ -79,9 +83,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Producto no encontrado");
-        }
-        repository.deleteById(id);
+        ProductEntity existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        existing.setDeleted(true);
+
+        repository.save(existing);
     }
 }

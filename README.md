@@ -59,7 +59,7 @@ Spring Boot facilita la creación de servidores web en Java al incluir un servid
 
 ![Comando para visualizar al usuario](assets/confirmacion.png)
 
-### Creación de clases en ```\products```:
+### Creación de clases en ```/products```:
 
 ## Evidencias:
 
@@ -76,7 +76,7 @@ Spring Boot facilita la creación de servidores web en Java al incluir un servid
 
 #### 3.- Verificación en PostgreSQL:
 
-![Comando para visualizar los productos](assets/05-lista-productos.png)
+![Comando para visualizar los productos](assets/lista-productos.png)
 
 
 
