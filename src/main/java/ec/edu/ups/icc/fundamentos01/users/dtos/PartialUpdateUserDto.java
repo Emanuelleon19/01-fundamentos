@@ -1,16 +1,15 @@
 package ec.edu.ups.icc.fundamentos01.users.dtos;
 
-/*
- * DTO utilizado para recibir los datos que se desean
- * actualizar parcialmente en un usuario existente.
- *
- * Los campos pueden venir nulos cuando no se desean actualizar.
- * No incluye createdAt porque la fecha de creación no debe modificarse.
- */
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 
 public class PartialUpdateUserDto {
 
+    @Size(min = 3, max = 150, message = "El nombre debe tener entre 3 y 150 caracteres")
     private String name;
+
+    @Email(message = "Debe ingresar un email válido")
+    @Size(max = 150, message = "El email no debe superar los 150 caracteres")
     private String email;
 
     public PartialUpdateUserDto() {
@@ -36,5 +35,4 @@ public class PartialUpdateUserDto {
     public void setEmail(String email) {
         this.email = email;
     }
-    
 }

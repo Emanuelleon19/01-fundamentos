@@ -87,3 +87,27 @@ Cuando el cliente realiza una petición HTTP con un JSON, el `ProductsController
 En el sentido inverso, PostgreSQL retorna el registro, Hibernate lo mapea a `ProductEntity`, el `ProductMapper` lo convierte a `ProductResponseDto` y el controlador lo devuelve al cliente como JSON.
 
 `BaseEntity` centraliza los campos comunes evitando duplicación en cada entidad del proyecto.
+
+# Práctica 6 (Spring Boot): Validación de DTOs y Control de Datos de Entrada
+
+## Cambios implementados
+
+
+## Evidencias
+
+### 1. POST inválido con precio negativo y nombre vacío
+
+
+![POST inválido](assets/post-invalido.png)
+
+---
+
+### 2. DELETE de un producto y reintento
+
+![DELETE producto](assets/delete-producto.png)
+
+---
+
+### 3. GET después del delete — producto eliminado no aparece
+
+![GET sin eliminados](assets/get-sin-eliminados.png)

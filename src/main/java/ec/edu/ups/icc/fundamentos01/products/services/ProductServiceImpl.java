@@ -28,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponseDto> findAll() {
         return repository.findAll().stream()
+                .filter(entity -> !entity.isDeleted())
                 .map(mapper::toModel)
                 .map(mapper::toResponseDto)
                 .collect(Collectors.toList());
@@ -54,6 +55,10 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
+        if (existing.isDeleted()) {
+            throw new IllegalStateException("No se puede actualizar un producto eliminado");
+        }
+
         existing.setName(dto.getName());
         existing.setDescription(dto.getDescription());
         existing.setPrice(dto.getPrice());
@@ -67,6 +72,10 @@ public class ProductServiceImpl implements ProductService {
     public Object partialUpdate(Long id, PartialUpdateProductDto dto) {
         ProductEntity existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        if (existing.isDeleted()) {
+            throw new IllegalStateException("No se puede actualizar un producto eliminado");
+        }
 
         if (dto.getName() != null)
             existing.setName(dto.getName());
@@ -86,8 +95,11 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity existing = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        existing.setDeleted(true);
+        if (existing.isDeleted()) {
+            throw new IllegalStateException("El producto ya fue eliminado");
+        }
 
+        existing.setDeleted(true);
         repository.save(existing);
     }
 }
