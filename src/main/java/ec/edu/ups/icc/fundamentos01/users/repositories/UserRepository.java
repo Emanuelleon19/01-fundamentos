@@ -7,12 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 
-/*
- * Repositorio encargado de gestionar la persistencia
- * de usuarios usando Spring Data JPA.
- */
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);
+
+    boolean existsByIdAndDeletedFalse(Long id);
 }

@@ -24,14 +24,13 @@ public class CreateProductDto {
     @Min(value = 0, message = "El stock no puede ser negativo")
     private Integer stock;
 
-    public CreateProductDto() {
-    }
+    @NotNull(message = "El ID del usuario es obligatorio")
+    private Long userId;
 
-    public CreateProductDto(String name, String description, BigDecimal price, Integer stock) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.stock = stock;
+    @NotNull(message = "El ID de la categoría es obligatorio")
+    private Long categoryId;
+
+    public CreateProductDto() {
     }
 
     public String getName() { return name; }
@@ -45,4 +44,10 @@ public class CreateProductDto {
 
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 }

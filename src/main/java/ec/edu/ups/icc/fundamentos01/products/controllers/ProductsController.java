@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
-import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
 
 @RestController
@@ -37,6 +37,16 @@ public class ProductsController {
     @GetMapping("/{id}")
     public Object findOne(@PathVariable Long id) {
         return service.findOne(id);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<ProductResponseDto> findByUserId(@PathVariable Long userId) {
+        return service.findByUserId(userId);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public List<ProductResponseDto> findByCategoryId(@PathVariable Long categoryId) {
+        return service.findByCategoryId(categoryId);
     }
 
     @PostMapping

@@ -24,14 +24,10 @@ public class UpdateProductDto {
     @Min(value = 0, message = "El stock no puede ser negativo")
     private Integer stock;
 
-    public UpdateProductDto() {
-    }
+    @NotNull(message = "El ID de la categoría es obligatorio")
+    private Long categoryId;
 
-    public UpdateProductDto(String name, String description, BigDecimal price, Integer stock) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.stock = stock;
+    public UpdateProductDto() {
     }
 
     public String getName() { return name; }
@@ -45,4 +41,7 @@ public class UpdateProductDto {
 
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 }

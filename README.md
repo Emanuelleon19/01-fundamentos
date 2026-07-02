@@ -90,8 +90,6 @@ En el sentido inverso, PostgreSQL retorna el registro, Hibernate lo mapea a `Pro
 
 # Práctica 6 (Spring Boot): Validación de DTOs y Control de Datos de Entrada
 
-## Cambios implementados
-
 
 ## Evidencias
 
@@ -111,3 +109,4 @@ En el sentido inverso, PostgreSQL retorna el registro, Hibernate lo mapea a `Pro
 ### 3. GET después del delete — producto eliminado no aparece
 
 ![GET sin eliminados](assets/get-sin-eliminados.png)
+
