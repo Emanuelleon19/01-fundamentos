@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ModelAttribute; 
 
 import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
@@ -19,14 +20,20 @@ import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
 import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
 import ec.edu.ups.icc.fundamentos01.users.services.UserService;
 
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductFilterByUserDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.services.ProductService; 
+
 @RestController
 @RequestMapping("/users")
 public class UsersController {
 
     private final UserService service;
+    private final ProductService productService; 
 
-    public UsersController(UserService service) {
+    public UsersController(UserService service, ProductService productService) {
         this.service = service;
+        this.productService = productService;
     }
 
     @GetMapping
@@ -63,5 +70,13 @@ public class UsersController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+    
+    @GetMapping("/{id}/products")
+    public List<ProductResponseDto> findProductsByUser(
+            @PathVariable Long id,
+            @Valid @ModelAttribute ProductFilterByUserDto filters
+    ) {
+        return productService.findByUserIdWithFilters(id, filters);
     }
 }

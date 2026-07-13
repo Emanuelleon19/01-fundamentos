@@ -2,6 +2,7 @@ package ec.edu.ups.icc.fundamentos01.products.dtos;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductResponseDto {
 
@@ -13,7 +14,7 @@ public class ProductResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private OwnerDto owner;
-    private CategoryDto category;
+    private List<CategoryDto> categories;
 
     public ProductResponseDto() {
     }
@@ -42,8 +43,8 @@ public class ProductResponseDto {
     public OwnerDto getOwner() { return owner; }
     public void setOwner(OwnerDto owner) { this.owner = owner; }
 
-    public CategoryDto getCategory() { return category; }
-    public void setCategory(CategoryDto category) { this.category = category; }
+    public List<CategoryDto> getCategories() { return categories; }
+    public void setCategories(List<CategoryDto> categories) { this.categories = categories; }
 
     public static class OwnerDto {
         private Long id;

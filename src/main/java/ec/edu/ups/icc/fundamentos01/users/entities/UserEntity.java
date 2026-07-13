@@ -1,16 +1,19 @@
 package ec.edu.ups.icc.fundamentos01.users.entities;
 
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseEntity;
+import ec.edu.ups.icc.fundamentos01.security.entities.RoleEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
 
-/*
- * Entidad JPA del recurso users.
- *
- * Representa la tabla users en PostgreSQL.
- * Esta clase sí pertenece a la capa de persistencia.
- */
+import java.util.Set;
+import java.util.HashSet;
+
 @Entity
 @Table(name = "users")
 public class UserEntity extends BaseEntity {
@@ -24,18 +27,23 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private String passwordHash;
 
-    // Constructor vacío
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<RoleEntity> roles = new HashSet<>();
+
     public UserEntity() {
     }
 
-    // Constructor lleno
     public UserEntity(String name, String email, String passwordHash) {
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
     }
 
-    // Getters y setters
     public String getName() {
         return name;
     }
@@ -58,5 +66,25 @@ public class UserEntity extends BaseEntity {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    /*
+     * Alias de compatibilidad para Spring Security (UserDetails).
+     * Spring Security espera getPassword()/setPassword() por convención.
+     */
+    public String getPassword() {
+        return passwordHash;
+    }
+
+    public void setPassword(String password) {
+        this.passwordHash = password;
+    }
+
+    public Set<RoleEntity> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<RoleEntity> roles) {
+        this.roles = roles;
     }
 }
