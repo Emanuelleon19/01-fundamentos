@@ -20,177 +20,107 @@ public class JwtUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
+    private static final String TOKEN_TYPE_CLAIM = "type";
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
+
     private final JwtProperties jwtProperties;
     private final SecretKey key;
 
-    /**
-     * Constructor: Inicializa JwtUtil con propiedades y clave secreta
-     * * @param jwtProperties: Inyectado automáticamente por Spring
-     * Contiene: secret, expiration, issuer, etc.
-     */
     public JwtUtil(JwtProperties jwtProperties) {
         this.jwtProperties = jwtProperties;
-        /**
-         * Genera clave segura para algoritmo HS256
-         * * Keys.hmacShaKeyFor(): Convierte String a SecretKey
-         * .getBytes(): Convierte String a byte array
-         * * Requisitos:
-         * - Mínimo 256 bits (32 caracteres) para HS256
-         * - Si es menor, lanza WeakKeyException
-         * * Ejemplo:
-         * secret = "mySecretKeyForJWT2024MustBeAtLeast256BitsLongForHS256Algorithm"
-         * key = SecretKey basada en esos bytes
-         * * Esta key se usa para:
-         * - Firmar tokens al generarlos (signWith)
-         * - Verificar tokens al validarlos (verifyWith)
-         */
         this.key = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
     }
 
-    /**
-     * Genera un token JWT desde la autenticación
-     * * Se usa en el FLUJO DE LOGIN:
-     * 1. Usuario envía email/password
-     * 2. AuthenticationManager valida credenciales
-     * 3. Se llama a este método para generar el token
-     * * @param authentication: Objeto Authentication de Spring Security
-     * Contiene el usuario autenticado
-     * @return String: Token JWT completo ("eyJhbGciOiJIUzI1NiJ9...")
-     */
-    public String generateToken(Authentication authentication) {
-        // 1. Extraer información del usuario autenticado
-        //    Cast seguro porque siempre retorna UserDetailsImpl
+    public String generateAccessToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        return buildToken(userPrincipal, jwtProperties.getExpiration(), ACCESS_TOKEN_TYPE);
+    }
 
-        // 2. Calcular fechas de emisión y expiración
+    public String generateAccessTokenFromUserDetails(UserDetailsImpl userDetails) {
+        return buildToken(userDetails, jwtProperties.getExpiration(), ACCESS_TOKEN_TYPE);
+    }
+
+    public String generateRefreshToken(UserDetailsImpl userDetails) {
+        return buildToken(userDetails, jwtProperties.getRefreshExpiration(), REFRESH_TOKEN_TYPE);
+    }
+
+    private String buildToken(UserDetailsImpl userDetails, Long expirationMs, String tokenType) {
         Date now = new Date();
-        // Fecha actual
-        Date expiryDate = new Date(now.getTime() + jwtProperties.getExpiration());
- 
+        Date expiryDate = new Date(now.getTime() + expirationMs);
 
-        // 3. Extraer roles del usuario y convertir a String
-        String roles = userPrincipal.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority) 
-            .collect(Collectors.joining(","));
+        String roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
         return Jwts.builder()
-            .subject(String.valueOf(userPrincipal.getId()))  // "1"
-            
-            .claim("email", userPrincipal.getEmail())     
-            .claim("name", userPrincipal.getName())       
-            .claim("roles", roles)                       
-            
-            .issuer(jwtProperties.getIssuer())            
-            
-            // Fechas
-            .issuedAt(now)                                
-            .expiration(expiryDate)                   
-            
-            .signWith(key, Jwts.SIG.HS256)             
-            
-            .compact();
+                .subject(String.valueOf(userDetails.getId()))
+                .claim("email", userDetails.getEmail())
+                .claim("name", userDetails.getName())
+                .claim("roles", roles)
+                .claim(TOKEN_TYPE_CLAIM, tokenType)
+                .issuer(jwtProperties.getIssuer())
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key, Jwts.SIG.HS256)
+                .compact();
+    }
+
+    public String generateToken(Authentication authentication) {
+        return generateAccessToken(authentication);
     }
 
     public String generateTokenFromUserDetails(UserDetailsImpl userDetails) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtProperties.getExpiration());
-
-        String roles = userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
-
-        return Jwts.builder()
-            .subject(String.valueOf(userDetails.getId()))
-            .claim("email", userDetails.getEmail())
-            .claim("name", userDetails.getName())
-            .claim("roles", roles)
-            .issuer(jwtProperties.getIssuer())
-            .issuedAt(now)
-            .expiration(expiryDate)
-            .signWith(key, Jwts.SIG.HS256)
-            .compact();
+        return generateAccessTokenFromUserDetails(userDetails);
     }
 
-    /**
-     * Extrae el ID de usuario del token
-     * * Se usa en JwtAuthenticationFilter para:
-     * 1. Validar el token
-     * 2. Extraer el ID del usuario
-     * 3. Cargar el usuario desde BD
-     * * @param token: Token JWT (sin "Bearer ")
-     * @return Long: ID del usuario
-     */
-    public Long getUserIdFromToken(String token) {
-        // 1. Parsear y validar el token
-        Claims claims = Jwts.parser()
-            .verifyWith(key)              // Verifica firma con clave secreta
-            .build()                      // Construye el parser
-            .parseSignedClaims(token)     // Parsea el token
-            .getPayload();
-        // Obtiene el payload (claims)
-
-        // 2. Extraer el subject (ID del usuario)
-        //    subject = "1" (guardado como String en el token)
-        //    Long.parseLong("1") = 1L
-        return Long.parseLong(claims.getSubject());
-    }
-
-    /**
-     * Extrae el email del token
-     * * Similar a getUserIdFromToken pero extrae un claim personalizado
-     */
     public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parser()
-            .verifyWith(key)
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
-
-        // Extraer claim "email" como String
+        Claims claims = getClaims(token);
         return claims.get("email", String.class);
     }
 
-    /**
-     * Valida el token JWT
-     * * VERIFICA:
-     * 1. Firma: ¿El token fue firmado por nosotros?
-     * 2. Formato: ¿El token tiene estructura correcta?
-     * 3. Expiración: ¿El token aún es válido?
-     * * Se usa en JwtAuthenticationFilter en CADA REQUEST
-     * * @param authToken: Token completo (sin "Bearer ")
-     * @return boolean: true si válido, false si inválido
-     */
+    public Long getUserIdFromToken(String token) {
+        Claims claims = getClaims(token);
+        return Long.parseLong(claims.getSubject());
+    }
+
+    public String getTokenType(String token) {
+        Claims claims = getClaims(token);
+        return claims.get(TOKEN_TYPE_CLAIM, String.class);
+    }
+
     public boolean validateToken(String authToken) {
         try {
-            // Intenta parsear el token
-            // Si algo falla, lanza excepción
-            Jwts.parser()
-                .verifyWith(key)              // Verifica firma con nuestra clave
-                .build()
-                .parseSignedClaims(authToken);
-            // Si llegamos aquí, el token es VÁLIDO
+            getClaims(authToken);
             return true;
         } catch (SignatureException ex) {
-            // Firma inválida: Token modificado o clave incorrecta
-            // Ejemplo: Alguien cambió el payload pero no puede firmar correctamente
             logger.error("Firma JWT inválida: {}", ex.getMessage());
         } catch (MalformedJwtException ex) {
-            // Token malformado: No tiene estructura correcta (header.payload.signature)
-            // Ejemplo: "abc123" en lugar de token válido
             logger.error("Token JWT malformado: {}", ex.getMessage());
         } catch (ExpiredJwtException ex) {
-            // Token expirado: Pasaron más de 30 minutos desde su creación
-            // Ejemplo: Token creado a las 10:00, ahora son las 10:35
             logger.error("Token JWT expirado: {}", ex.getMessage());
         } catch (UnsupportedJwtException ex) {
-            // Token no soportado: Usa algoritmo que no soportamos
-            // Ejemplo: Token firmado con RS256 pero esperamos HS256
             logger.error("Token JWT no soportado: {}", ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            // Claims vacío: Token sin payload
             logger.error("JWT claims string está vacío: {}", ex.getMessage());
         }
-        // Si cayó en cualquier catch, el token es INVÁLIDO
         return false;
+    }
+
+    public boolean validateAccessToken(String token) {
+        return validateToken(token) && ACCESS_TOKEN_TYPE.equals(getTokenType(token));
+    }
+
+    public boolean validateRefreshToken(String token) {
+        return validateToken(token) && REFRESH_TOKEN_TYPE.equals(getTokenType(token));
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

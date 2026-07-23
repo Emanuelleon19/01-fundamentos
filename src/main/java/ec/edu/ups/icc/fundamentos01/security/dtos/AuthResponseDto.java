@@ -2,12 +2,10 @@ package ec.edu.ups.icc.fundamentos01.security.dtos;
 
 import java.util.List;
 
-/**
- * AuthResponseDto: Estructura de respuesta que devuelve el Token JWT al cliente
- */
 public class AuthResponseDto {
 
     private String token;
+    private String refreshToken;
     private String type = "Bearer";
     private Long id;
     private String name;
@@ -17,8 +15,9 @@ public class AuthResponseDto {
     public AuthResponseDto() {
     }
 
-    public AuthResponseDto(String token, Long id, String name, String email, List<String> roles) {
+    public AuthResponseDto(String token, String refreshToken, Long id, String name, String email, List<String> roles) {
         this.token = token;
+        this.refreshToken = refreshToken;
         this.id = id;
         this.name = name;
         this.email = email;
@@ -31,6 +30,14 @@ public class AuthResponseDto {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public String getType() {

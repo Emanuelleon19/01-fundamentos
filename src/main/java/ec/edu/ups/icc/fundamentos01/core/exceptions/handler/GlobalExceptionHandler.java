@@ -1,6 +1,7 @@
 package ec.edu.ups.icc.fundamentos01.core.exceptions.handler;
 
 import ec.edu.ups.icc.fundamentos01.core.exceptions.base.ApplicationException;
+import ec.edu.ups.icc.fundamentos01.core.exceptions.domain.BadRequestException;
 import ec.edu.ups.icc.fundamentos01.core.exceptions.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,20 @@ public class GlobalExceptionHandler {
 
                 return ResponseEntity
                                 .status(ex.getStatus())
+                                .body(response);
+        }
+
+        @ExceptionHandler(BadRequestException.class)
+        public ResponseEntity<ErrorResponse> handleBadRequestException(
+                        BadRequestException ex,
+                        HttpServletRequest request) {
+                ErrorResponse response = new ErrorResponse(
+                                HttpStatus.BAD_REQUEST,
+                                ex.getMessage(),
+                                request.getRequestURI());
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
                                 .body(response);
         }
 
@@ -108,7 +123,6 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.FORBIDDEN)
                                 .body(response);
         }
-
 
         @ExceptionHandler(AuthenticationException.class)
         public ResponseEntity<ErrorResponse> handleAuthenticationException(

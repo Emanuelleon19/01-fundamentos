@@ -15,16 +15,25 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+app:
+  jwt:
+    secret: ${JWT_SECRET:mySecretKeyForJWT2024MustBeAtLeast256BitsLongForHS256Algorithm}
 
-jwt:
-  secret: ${JWT_SECRET:mySecretKeyForJWT2024MustBeAtLeast256BitsLongForHS256Algorithm}
+    expiration: 900000
+
+    refreshExpiration: 604800000
+
+    issuer: fundamentos01-api
+
+    header: Authorization
   
-  expiration: 1800000  
-  
-  refresh-expiration: 604800000  
-  
-  issuer: fundamentos01-api
-  
-  header: Authorization
-  
-  prefix: "Bearer "
+    prefix: "Bearer "
+    
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true

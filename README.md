@@ -366,3 +366,125 @@ Porque el cliente podría enviar el `id` de otro usuario y crear productos a su 
 
 **¿Cuál es la diferencia entre autorización por rol y autorización por ownership?**
 El rol define qué puede hacer un tipo de usuario en general (ej. solo ADMIN lista todo sin paginar). El ownership valida si el usuario autenticado es dueño del recurso puntual que quiere modificar, comparando su id con el `owner_id` del recurso.
+
+# Práctica 14 (Spring Boot): Refresh Tokens
+
+## 1. Login exitoso con Access Token y Refresh Token
+
+![Login exitoso](./assets/14-login.png)
+
+---
+
+## 2. Consumo de endpoint protegido con Access Token
+
+![Acceso con access token](./assets/access-token-ok.png)
+
+---
+
+## 3. Bloqueo al intentar usar Refresh Token como Access Token
+
+![Bloqueo uso refresh token](./assets/refresh-como-access.png)
+
+---
+
+## 4. Renovación exitosa de tokens (Refresh)
+
+![Renovación exitosa](./assets/refresh-exitoso.png)
+
+---
+
+## 5. Bloqueo al intentar reutilizar un Refresh Token anterior (Rotación)
+
+![Bloqueo refresh reutilizado](./assets/refresh-reutilizado.png)
+
+---
+
+## 6. Cierre de sesión (Logout)
+
+![Logout exitoso](./assets/logout-exitoso.png)
+
+---
+
+## 7. Bloqueo al intentar hacer Refresh después de Logout
+
+![Bloqueo refresh post logout](./assets/refresh-post-logout.png)
+
+---
+
+## Preguntas
+
+**¿Cuál es la diferencia entre access token y refresh token?**
+El access token se usa para consumir endpoints protegidos, viaja en la cabecera `Authorization: Bearer` y tiene una duración corta. El refresh token sirve únicamente para solicitar nuevos access tokens cuando el anterior expira, viaja en el body de `/api/auth/refresh` y tiene una duración más larga.
+
+**¿Por qué el refresh token no debe usarse en Authorization: Bearer?**
+Porque exponer el refresh token en cada petición aumenta el riesgo si es interceptado. Al limitarlo únicamente al endpoint de renovación, se reduce su exposición y se puede validar y revocar de forma segura en la base de datos.
+
+**¿Qué significa rotar un refresh token?**
+Significa que cada vez que un refresh token se utiliza para renovar la sesión, este es revocado inmediatamente en la base de datos y se genera un nuevo refresh token junto con el nuevo access token. Esto evita que una misma credencial se reutilice indefinidamente.## 23.1 Login
+
+# Práctica 15 (Spring Boot): Documentacion
+
+# 23. Resultados y evidencias
+
+---
+
+## Captura de Swagger UI cargado
+* **Ruta:** `/api/swagger-ui/index.html`
+![Swagger UI Cargado](assets/15-s1.png)
+
+---
+
+## Captura del JSON OpenAPI
+* **Ruta:** `/api/v3/api-docs`
+![JSON OpenAPI](assets/15-s2.png)
+
+---
+
+## Captura de AuthController documentado
+![AuthController Documentado](assets/15-s3.png)
+
+---
+
+## Captura del botón Authorize
+![Botón Authorize](assets/15-s4.png)
+
+---
+
+## Captura de endpoint protegido sin token
+* **Endpoint:** `GET /api/products/page`
+![Sin token 401](assets/15-s5.png)
+
+---
+
+## Captura de endpoint protegido con token desde Swagger
+* **Endpoint:** `GET /api/products/page?page=0&size=5`
+![Con token 200](assets/15-s6.png)
+
+---
+
+## Captura de endpoint ADMIN con usuario normal
+* **Endpoint:** `GET /api/products` (Rol: `ROLE_USER`)
+![Admin con User 403](assets/15-s7.png)
+
+---
+
+## Captura de endpoint ADMIN con usuario administrador
+* **Endpoint:** `GET /api/products` (Rol: `ROLE_ADMIN`)
+![Admin con Admin 200](assets/15-s8.png)
+
+se realizo en bruno ya que en la pagina de swagger al ser muchos registros de los productos que tenemos
+la pagina se quedaba cargando
+
+---
+
+## Explicación breve
+
+### ¿Cuál es la diferencia entre Swagger UI y OpenAPI?
+> **OpenAPI** es la especificación técnica en formato JSON/YAML que describe la estructura de una API REST (rutas, parámetros, respuestas y seguridad). **Swagger UI** es la interfaz gráfica que procesa esa especificación para mostrar una documentación visual e interactiva en el navegador.
+
+### ¿Por qué Swagger puede ser público pero los endpoints seguir protegidos?
+> Porque Swagger UI solo expone los metadatos y esquemas del API, no la lógica de negocio ni los datos. Al mantener la regla `.anyRequest().authenticated()` en Spring Security, las peticiones HTTP reales a los controladores siguen exigiendo un token JWT válido.
+
+### ¿Cómo se configura Swagger para enviar un JWT en Authorization: Bearer?
+> Se define un `SecurityScheme` de tipo HTTP con esquema `bearer` y formato `JWT` en la clase `OpenApiConfig`. Luego, se anota el controlador protegido con `@SecurityRequirement(name = "bearerAuth")`, lo que habilita el botón **Authorize** en la interfaz para inyectar la cabecera `Authorization: Bearer <token>` en cada solicitud.
+

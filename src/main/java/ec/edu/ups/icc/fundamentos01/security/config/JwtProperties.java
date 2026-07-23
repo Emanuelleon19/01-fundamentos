@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "jwt")
+@ConfigurationProperties(prefix = "app.jwt")
 public class JwtProperties {
 
     private String secret;
@@ -14,9 +14,7 @@ public class JwtProperties {
     private String header;
     private String prefix;
 
-    public JwtProperties() {
-    }
-
+    // Getters y Setters
     public String getSecret() {
         return secret;
     }
@@ -64,4 +62,5 @@ public class JwtProperties {
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
+   
 }
