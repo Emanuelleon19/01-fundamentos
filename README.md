@@ -488,3 +488,28 @@ la pagina se quedaba cargando
 ### ¿Cómo se configura Swagger para enviar un JWT en Authorization: Bearer?
 > Se define un `SecurityScheme` de tipo HTTP con esquema `bearer` y formato `JWT` en la clase `OpenApiConfig`. Luego, se anota el controlador protegido con `@SecurityRequirement(name = "bearerAuth")`, lo que habilita el botón **Authorize** en la interfaz para inyectar la cabecera `Authorization: Bearer <token>` en cada solicitud.
 
+# Practica 16 
+
+## Entregables de la práctica
+
+### Captura de `docker ps` en Ubuntu Server
+![docker ps](./assets/16-docker-ps.png)
+*Estado de los contenedores en ejecución dentro de la máquina virtual Ubuntu Server.*
+
+---
+
+### Captura de `curl` a `/api/actuator/health` desde Ubuntu Server
+![curl local](./assets/16-actuator.png)
+*Verificación del endpoint de salud ejecutado directamente en la consola de Ubuntu Server.*
+
+---
+
+### Captura de `curl` a `/api/actuator/health` desde la máquina anfitriona
+![curl host](./assets/16-s3.2.png)
+*Respuesta status: UP obtenida desde la máquina anfitriona mediante la IP de la máquina virtual.*
+
+---
+
+### Captura consumo de `/login` desde la máquina anfitriona con Bruno / Postman
+![Consumo Login](./assets/postman-login.png)
+*Petición POST exitosa al endpoint `/api/auth/login` realizada desde la máquina anfitriona obteniendo respuesta del servicio.*
